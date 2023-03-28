@@ -15,6 +15,7 @@
 
 6)	SELECT DISTINCT COUNT(num_fattura) as afatt, EXTRACT('Year' FROM datafattura) as anno FROM FATTURE WHERE tipologia = 'A' GROUP BY EXTRACT('Year' FROM datafattura) HAVING COUNT(tipologia) > 2
 
+
 7)	SELECT fa.num_fattura, fa.importo, fa.datafattura, fo.denominazione FROM fatture fa INNER JOIN fornitori fo ON fo.id_fornitore = fa.id_fornitore
 
 
