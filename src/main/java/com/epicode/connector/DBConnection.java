@@ -1,14 +1,14 @@
 package com.epicode.connector;
 
-import com.epicode.model.Cliente;
-import com.epicode.model.Fattura;
-import com.epicode.model.Fornitore;
-import com.epicode.model.Prodotto;
+import com.epicode.model.*;
 import org.checkerframework.checker.units.qual.A;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DBConnection {
     private String url = "jdbc:postgresql://localhost:3309/";
@@ -20,17 +20,21 @@ public class DBConnection {
     public DBConnection() throws SQLException {
         Connection conn = DriverManager.getConnection(url + dbName, username, password);
         st = conn.createStatement();
-        creaTabClienti();
+        creaTabStudenti();
     }
 
-    public void creaTabClienti() throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS clienti (" +
-                "    id_cliente SERIAL PRIMARY KEY," +
-                "    nome VARCHAR NOT NULL," +
-                "    cognome VARCHAR NOT NULL," +
-                "    datadinascita date NOT NULL," +
-                "    regioneresidenza VARCHAR NOT NULL)";
+    public void creaTabStudenti() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS school_students (" +
+                "    id SERIAL PRIMARY KEY," +
+                "    name VARCHAR NOT NULL," +
+                "    lastname VARCHAR NOT NULL," +
+                "    gender VARCHAR NOT NULL," +
+                "    avg INT DEFAULT '0'," +
+                "    min_vote INT DEFAULT '0'," +
+                "    max_vote INT DEFAULT '0'," +
+                "    birthdate date NOT NULL)";
         this.st.executeUpdate(sql);
+        System.out.println("Ho creato la tabella STUDENTI");
     }
 
     public void creaCliente(Cliente cl) throws SQLException {
@@ -187,6 +191,69 @@ public class DBConnection {
             String denominazione = rs.getString("denominazione");
             System.out.println(denominazione);
         }
+    }
+
+
+    public void insertStudent(Studente s) throws SQLException {
+        String sql = "INSERT INTO school_students (name, lastname, gender, birthdate) " +
+                "VALUES ('" + s.getName() + "', '" + s.getLastname() + "', '" + s.getGender() + "', '" + s.getBirthdate() + "')";
+        this.st.executeUpdate(sql);
+        System.out.println("Creato: " + s.toString());
+    }
+
+    public void updateStudent(int id, HashMap<String, Object> s) throws SQLException {
+        String sql = "UPDATE school_students SET avg = " + s.get("avg") + " , min_vote = " + s.get("min_vote") + " , max_vote = " + s.get("max_vote") + " WHERE id = " + id;
+        this.st.executeUpdate(sql);
+        System.out.println("Aggiornato l'id " + id + ": " + s.toString());
+    }
+
+    public void deleteStudent(int id) throws SQLException {
+        String sql1 = "SELECT * FROM school_students WHERE id = " + id;
+        ResultSet rs = this.st.executeQuery(sql1);
+        if (rs.next()) {
+            String sql2 = "DELETE FROM school_students WHERE id = " + id;
+            this.st.executeUpdate(sql2);
+            System.out.println("Ho eliminato l'id " + id);
+        } else {
+            System.out.println("L'id " + id + " non esiste nel DB");
+        }
+    }
+
+
+    public void getBest() throws SQLException {
+        String sql = "SELECT * FROM school_students ORDER BY avg DESC LIMIT 1";
+        ResultSet rs = st.executeQuery(sql);
+        if (rs.next()) {
+            int id = rs.getInt("id");
+            String name = rs.getString("name");
+            String lastname = rs.getString("lastname");
+            String gender = rs.getString("gender");
+            LocalDate birthdate = rs.getDate("birthdate").toLocalDate();
+            int avg = rs.getInt("avg");
+            int min_vote = rs.getInt("min_vote");
+            int max_vote = rs.getInt("max_vote");
+            System.out.println(new Studente(id, name, lastname, gender, birthdate, avg, min_vote, max_vote));
+        }
+    }
+
+    public void getVoteRange(int min, int max) throws SQLException {
+        List<Studente> studenti = new ArrayList<>();
+        String sql = "SELECT * FROM school_students WHERE min_vote > " + (min - 1) + " AND max_vote < " + (max + 1) + " ORDER BY avg DESC";
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String name = rs.getString("name");
+            String lastname = rs.getString("lastname");
+            String gender = rs.getString("gender");
+            LocalDate birthdate = rs.getDate("birthdate").toLocalDate();
+            int avg = rs.getInt("avg");
+            int min_vote = rs.getInt("min_vote");
+            int max_vote = rs.getInt("max_vote");
+            Studente stud = new Studente(id, name, lastname, gender, birthdate, avg, min_vote, max_vote);
+            studenti.add(stud);
+        }
+        System.out.println("Elenco studenti con voti compresi tra " + min + " e " + max);
+        studenti.forEach(stud -> System.out.println(stud.toString()));
     }
 
 

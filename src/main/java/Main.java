@@ -1,10 +1,14 @@
 import com.epicode.connector.DBConnection;
 import com.epicode.model.Cliente;
 import com.epicode.model.Fornitore;
+import com.epicode.model.Studente;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -39,6 +43,27 @@ public class Main {
 
             System.out.println("\n\t *** ESERCIZIO 10");
             db.abitantidi("Lombardia");
+
+            System.out.println("\n\t SECONDA PARTE!!!  >  *** ESERCIZIO 1");
+            Studente s1 = new Studente("Vincenzo", "Maiorana", "M", LocalDate.of(1993, 10, 01));
+            //db.insertStudent(s1);
+
+            System.out.println("\n\t SECONDA PARTE!!!  >  *** ESERCIZIO 2");
+            HashMap<String, Object> voti = new HashMap<>();
+            voti.put("avg", 7);
+            voti.put("min_vote", 6);
+            voti.put("max_vote", 7);
+            db.updateStudent(1, voti);
+
+            System.out.println("\n\t SECONDA PARTE!!!  >  *** ESERCIZIO 3");
+            db.deleteStudent(5);
+
+            System.out.println("\n\t SECONDA PARTE!!!  >  *** ESERCIZIO 4");
+            db.getBest();
+
+            System.out.println("\n\t SECONDA PARTE!!!  >  *** ESERCIZIO 5");
+            db.getVoteRange(5, 7);
+
 
         } catch (SQLException e) {
             e.printStackTrace();
